@@ -2,19 +2,18 @@ import React from "react";
 import Header from "../components/common/Header";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { Button } from "@heroui/button";
+import VideoTable from "../components/table/VideoTable";
 import { useDisclosure } from "@heroui/modal";
-import CreateEmployeeModal from "../components/modals/CreateEmployeeModal";
-import DietPdfTable from "../components/table/DietPdfTable";
+import { Button } from "@heroui/button";
 
-const DietPdfPage = () => {
-  const filterOptions = ["IBS", "Depression"];
+const VideoPage = () => {
+  const filterOptions = ["Youtube", "Uploaded"];
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
       <div className="flex-1 overflow-auto relative z-10">
-        <Header title="Products" />
+        <Header title="Videos" />
         <div className="p-10">
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="flex items-center gap-10">
@@ -24,19 +23,24 @@ const DietPdfPage = () => {
                 placeholder="Search here..."
                 type="text"
               />
+              <Select className="w-60" placeholder="Select Filter">
+                {filterOptions.map((filter, index) => (
+                  <SelectItem key={index}>{filter}</SelectItem>
+                ))}
+              </Select>
             </div>
             <div className="flex flex-1 justify-end">
               <Button onPress={onOpen} color="primary">
-                Add Product
+                Add Video
               </Button>
             </div>
           </div>
-          <DietPdfTable />
+
+          <VideoTable />
         </div>
       </div>
-      <CreateEmployeeModal isOpen={isOpen} onClose={onClose} />
     </>
   );
 };
 
-export default DietPdfPage;
+export default VideoPage;

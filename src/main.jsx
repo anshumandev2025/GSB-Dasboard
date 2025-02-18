@@ -5,14 +5,17 @@ import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { ToastContainer } from "react-toastify";
+import { HeroUIProvider } from "@heroui/react";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <ToastContainer />
-        <App />
-      </AuthProvider>
+      <HeroUIProvider>
+        <AuthProvider>
+          <ToastContainer />
+          <App />
+        </AuthProvider>
+      </HeroUIProvider>
     </BrowserRouter>
   </StrictMode>
 );
