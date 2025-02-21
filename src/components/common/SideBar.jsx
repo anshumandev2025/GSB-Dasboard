@@ -1,29 +1,23 @@
 import {
-  BarChart2,
-  DollarSign,
   Menu,
   Settings,
   ShoppingBag,
-  ShoppingCart,
   Users,
   FileText,
   Video,
   FileQuestion,
   User,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDisclosure } from "@heroui/modal";
+import ConfirmModal from "../modals/ConfirmModal";
+import { useAuth } from "../../context/AuthContext";
 
 const SIDEBAR_ITEMS = [
-  // {
-  //   name: "Overview",
-  //   icon: BarChart2,
-  //   color: "#6366f1",
-  //   href: "/",
-  // },
   { name: "Products", icon: ShoppingBag, color: "#8B5CF6", href: "/products" },
-  // { name: "Orders", icon: ShoppingCart, color: "#F59E0B", href: "/orders" },
   { name: "Users", icon: Users, color: "#EC4899", href: "/users" },
   { name: "Employee", icon: User, color: "#10B981", href: "/employee" },
   { name: "Videos", icon: Video, color: "#3B82F6", href: "/videos" },
@@ -34,12 +28,19 @@ const SIDEBAR_ITEMS = [
     color: "#3B82F6",
     href: "/questions",
   },
-  { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
+  { name: "Logout", icon: LogOut, color: "#6EE7B7" },
 ];
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const handleLogout = () => {
+    logout();
+    onClose();
+    navigate("/sign-in");
+  };
   return (
     <motion.div
       className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${
@@ -59,8 +60,15 @@ const Sidebar = () => {
 
         <nav className="mt-8 flex-grow">
           {SIDEBAR_ITEMS.map((item) => (
-            <Link key={item.href} to={item.href}>
-              <motion.div className="flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2">
+            <Link key={item.name} to={item.href}>
+              <motion.div
+                onClick={() => {
+                  if (item.name == "Logout") {
+                    onOpen();
+                  }
+                }}
+                className="flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2"
+              >
                 <item.icon
                   size={20}
                   style={{ color: item.color, minWidth: "20px" }}
@@ -83,6 +91,12 @@ const Sidebar = () => {
           ))}
         </nav>
       </div>
+      <ConfirmModal
+        isOpen={isOpen}
+        onClose={onClose}
+        onConfirm={handleLogout}
+        title="Are you sure you want to logout?"
+      />
     </motion.div>
   );
 };

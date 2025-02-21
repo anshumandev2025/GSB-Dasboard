@@ -80,7 +80,7 @@ const CreateEmployeeModal = ({
         successToast("Employee update successfully");
         setToggleFetchEmployees((prev) => !prev);
       } else {
-        await axios.post(`${baseURL}/employee/create`, {
+        await axios.post(`${baseURL}/employee`, {
           employee_name: data.name,
           employee_email_address: data.email,
           employee_mobile_number: data.mobile,

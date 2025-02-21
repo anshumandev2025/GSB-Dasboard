@@ -23,7 +23,7 @@ const EmployeePage = () => {
     const fetchEmployeesData = async () => {
       try {
         const response = await axios.get(
-          `${baseURL}/employee?page=1&limit={10}&query=${query}&filter=${filter}`
+          `${baseURL}/employee?page=1&limit=10&query=${query}&filter=${filter}`
         );
         setEmployeesData(response.data.data);
         setTotalEmployees(response.data.total);

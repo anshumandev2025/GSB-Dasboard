@@ -1,4 +1,4 @@
-import { Chip, Pagination, Tooltip } from "@heroui/react";
+import { Chip, Pagination, Tooltip, useDisclosure } from "@heroui/react";
 import {
   Table,
   TableBody,
@@ -7,121 +7,91 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import React, { useCallback } from "react";
+import axios from "axios";
+import React, { useCallback, useEffect, useState } from "react";
+import { baseURL } from "../../utils/urls";
+import { Pencil, Trash2 } from "lucide-react";
+import ConfirmModal from "../modals/ConfirmModal";
 
 export const columns = [
   { name: "Name", uid: "name" },
+  { name: "Category", uid: "category" },
   { name: "Price", uid: "price" },
   { name: "Description", uid: "description" },
   { name: "Image", uid: "image" },
-];
-export const users = [
-  {
-    id: 1,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 2,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 3,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 4,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 5,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-
-  {
-    id: 6,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 7,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 8,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 9,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 10,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
+  { name: "Action", uid: "action" },
 ];
 
 const ProductsTable = () => {
+  const [products, setProducts] = useState([]);
+  const [currentProduct, setCurrentProduct] = useState();
+  const {
+    isOpen: isOpenDeleteProduct,
+    onClose: onCloseDeleteProduct,
+    onOpen: onOpenDeleteProduct,
+  } = useDisclosure();
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await axios.get(`${baseURL}/product`);
+      setProducts(response.data);
+    };
+    fetchProducts();
+  }, []);
+
+  const deleteProduct = async () => {
+    if (currentProduct) {
+      try {
+        await axios.delete(`${baseURL}/product/${currentProduct._id}`);
+        onCloseDeleteProduct();
+      } catch (error) {
+        console.log("error-->", error);
+      }
+    }
+  };
   const renderCell = useCallback((product, columnKey) => {
     const cellValue = product[columnKey];
     switch (columnKey) {
       case "description":
         return <p className="text-wrap">{product.description}</p>;
       case "image":
-        return <img src={product.image} alt="product" />;
+        return (
+          <img
+            className="size-20 object-cover"
+            src={product.image}
+            alt="product"
+          />
+        );
       case "goal":
         return (
           <Chip className="capitalize" size="sm" variant="flat">
             {cellValue}
           </Chip>
+        );
+      case "action":
+        return (
+          <div className="relative flex items-center gap-2">
+            <Tooltip content="Edit user">
+              <span
+                onClick={() => {
+                  setCurrentProduct(product);
+                }}
+                className="text-lg text-default-400 cursor-pointer active:opacity-50"
+              >
+                <Pencil />
+              </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete user">
+              <span
+                onClick={() => {
+                  onOpenDeleteProduct();
+                  setCurrentProduct(product);
+                }}
+                className="text-lg text-danger cursor-pointer active:opacity-50"
+              >
+                <Trash2 />
+              </span>
+            </Tooltip>
+          </div>
         );
       default:
         return cellValue;
@@ -140,9 +110,9 @@ const ProductsTable = () => {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody items={users}>
+        <TableBody items={products}>
           {(item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item._id}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -153,6 +123,12 @@ const ProductsTable = () => {
       <div className="w-full flex justify-end">
         <Pagination isCompact showControls initialPage={1} total={10} />
       </div>
+      <ConfirmModal
+        isOpen={isOpenDeleteProduct}
+        onClose={onCloseDeleteProduct}
+        title="Are you sure you want to delete this product"
+        onConfirm={deleteProduct}
+      />
     </div>
   );
 };

@@ -151,14 +151,14 @@ const EmployeeTable = ({ employeesData, total, setToggleFetchEmployees }) => {
         setToggleFetchEmployees={setToggleFetchEmployees}
       />
       <ConfirmModal
-        isOpenConfirmModal={isOpenConfirmModal}
-        onCloseConfirmModal={onCloseConfirmModal}
+        isOpen={isOpenConfirmModal}
+        onClose={onCloseConfirmModal}
         title="Are you sure you want to delete this employee?"
         onConfirm={deleteSelectedEmployee}
       />
       <ConfirmModal
-        isOpenConfirmModal={isOpenStatusUpdate}
-        onCloseConfirmModal={onCloseStatusUpdate}
+        isOpen={isOpenStatusUpdate}
+        onClose={onCloseStatusUpdate}
         title={`Are you sure you want to ${
           employeeInfo?.is_employee_active ? "Deactive" : "Active"
         } this employee?`}

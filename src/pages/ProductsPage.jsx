@@ -5,7 +5,7 @@ import { Select, SelectItem } from "@heroui/select";
 import ProductsTable from "../components/table/ProductsTable";
 import { Button } from "@heroui/button";
 import { useDisclosure } from "@heroui/modal";
-import CreateEmployeeModal from "../components/modals/CreateEmployeeModal";
+import CreateUpdateProductModal from "../components/modals/CreateUpdateProductModal";
 
 const ProductsPage = () => {
   const filterOptions = ["IBS", "Depression"];
@@ -34,7 +34,7 @@ const ProductsPage = () => {
           <ProductsTable />
         </div>
       </div>
-      <CreateEmployeeModal isOpen={isOpen} onClose={onClose} />
+      <CreateUpdateProductModal isOpen={isOpen} onClose={onClose} />
     </>
   );
 };

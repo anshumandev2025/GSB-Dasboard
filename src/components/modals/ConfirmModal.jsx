@@ -8,14 +8,9 @@ import {
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
 
-const ConfirmModal = ({
-  isOpenConfirmModal,
-  onCloseConfirmModal,
-  onConfirm,
-  title,
-}) => {
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title }) => {
   return (
-    <Modal isOpen={isOpenConfirmModal} size="sm" onClose={onCloseConfirmModal}>
+    <Modal isOpen={isOpen} size="sm" onClose={onClose}>
       <ModalContent>
         {(onClose) => (
           <>
