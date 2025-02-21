@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import axios from "axios";
-import { baseURL } from "../../utils/urls";
 import useToast from "../../hooks/useToast";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
@@ -15,17 +13,19 @@ import {
   ModalHeader,
 } from "@heroui/modal";
 import { Select, SelectItem } from "@heroui/select";
+import { api } from "../../utils/apiClient";
 
 const CreateUpdateProductModal = ({
   isOpen,
   onClose,
   productInfo,
-  //   setToggleFetchProducts,
+  setToggleFetchProducts,
 }) => {
   const { successToast, errorToast } = useToast();
   const [imagePreview, setImagePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const categoryOptions = ["IBS", "Depression", "Anxitey"];
+  // const categoryOptions = ["IBS", "Depression", "Anxitey"];
+  console.log("current product info-->", productInfo);
   const schema = z.object({
     product_name: z
       .string()
@@ -36,7 +36,7 @@ const CreateUpdateProductModal = ({
     product_descriptions: z
       .string()
       .min(10, "Description must be at least 10 characters"),
-    product_category: z.string().min(1, "Category is required"),
+    // product_category: z.string().min(1, "Category is required"),
     product_image: z
       .instanceof(FileList)
       .refine((files) => {
@@ -48,10 +48,8 @@ const CreateUpdateProductModal = ({
       }, "Image is required")
       .refine((files) => {
         if (files.length === 0) return true;
-        return ["image/jpeg", "image/png", "image/jpg"].includes(
-          files[0]?.type
-        );
-      }, "Only .jpg, .jpeg, and .png formats are supported.")
+        return ["image/png", "image/jpg"].includes(files[0]?.type);
+      }, "Only .jpg,and .png formats are supported.")
       .refine((files) => {
         if (files.length === 0) return true;
         return files[0]?.size < 5 * 1024 * 1024;
@@ -71,7 +69,7 @@ const CreateUpdateProductModal = ({
       product_name: "",
       product_price: 0,
       product_descriptions: "",
-      product_category: "",
+      // product_category: "",
       product_image: undefined,
     },
   });
@@ -79,16 +77,17 @@ const CreateUpdateProductModal = ({
   // Set default values when `productInfo` changes
   useEffect(() => {
     if (productInfo) {
+      console.log("info product-->", productInfo);
       reset({
-        product_name: productInfo.product_name || "",
-        product_price: productInfo.product_price || 0,
-        product_descriptions: productInfo.product_descriptions || "",
-        product_category: productInfo.product_category || "",
+        product_name: productInfo.name || "xddf",
+        product_price: productInfo.price || 0,
+        product_descriptions: productInfo.description || "",
+        // product_category: productInfo.product_category || "",
       });
 
       // If there's an existing image, show it in preview
-      if (productInfo.product_image) {
-        setImagePreview(productInfo.product_image);
+      if (productInfo.image) {
+        setImagePreview(productInfo.image);
       }
     }
   }, [productInfo, reset]);
@@ -109,15 +108,14 @@ const CreateUpdateProductModal = ({
   const submitForm = async (data) => {
     try {
       setIsUploading(true);
-      console.log("data-->", data);
-      console.log("category-->", categoryOptions[data.product_category]);
       // Create a FormData object to handle file upload
       const formData = new FormData();
+      console.log("data-->", data);
       formData.append("name", data.product_name);
       formData.append("price", data.product_price);
       formData.append("description", data.product_descriptions);
-      formData.append("category", categoryOptions[data.product_category]);
-
+      // formData.append("category", categoryOptions[data.product_category]);
+      console.log("isFormdata-->", formData);
       // Only append image if a new one is selected
       if (data.product_image.length > 0) {
         formData.append("image", data.product_image[0]);
@@ -125,21 +123,24 @@ const CreateUpdateProductModal = ({
 
       if (productInfo) {
         // Update existing product
-        formData.append("product_id", productInfo._id);
-        await axios.put(`${baseURL}/product`, formData, {
+        formData.append("id", productInfo._id);
+        console.log("fordata-->", formData);
+        await api.put(`/product`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
         successToast("Product updated successfully");
+        setToggleFetchProducts((prev) => !prev);
       } else {
         // Create new product
-        await axios.post(`${baseURL}/product`, formData, {
+        await api.post(`/product`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
         successToast("Product created successfully");
+        setToggleFetchProducts((prev) => !prev);
       }
 
       //   setToggleFetchProducts((prev) => !prev);
@@ -165,23 +166,37 @@ const CreateUpdateProductModal = ({
             <ModalBody>
               <form onSubmit={handleSubmit(submitForm)} className="space-y-4">
                 <div>
-                  <Input
-                    label="Product Name"
-                    placeholder="Enter product name"
-                    {...register("product_name")}
-                    isInvalid={!!errors.product_name}
-                    errorMessage={errors.product_name?.message}
+                  <Controller
+                    name="product_name"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Product Name"
+                        placeholder="Enter product name"
+                        {...register("product_name")}
+                        isInvalid={!!errors.product_name}
+                        errorMessage={errors.product_name?.message}
+                      />
+                    )}
                   />
                 </div>
 
                 <div>
-                  <Input
-                    label="Product Price"
-                    type="number"
-                    placeholder="0.00"
-                    {...register("product_price")}
-                    isInvalid={!!errors.product_price}
-                    errorMessage={errors.product_price?.message}
+                  <Controller
+                    name="product_price"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        label="Product Price"
+                        type="number"
+                        placeholder="0.00"
+                        {...register("product_price")}
+                        isInvalid={!!errors.product_price}
+                        errorMessage={errors.product_price?.message}
+                      />
+                    )}
                   />
                 </div>
 
@@ -202,7 +217,7 @@ const CreateUpdateProductModal = ({
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <Select
                     className="w-60"
                     placeholder="Select Category"
@@ -214,13 +229,13 @@ const CreateUpdateProductModal = ({
                       <SelectItem key={index}>{filter}</SelectItem>
                     ))}
                   </Select>
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Product Image</label>
                   <input
                     type="file"
-                    accept="image/png, image/jpeg, image/jpg"
+                    accept="image/png, image/jpg"
                     {...register("product_image")}
                     onChange={(e) => {
                       handleImageChange(e);
@@ -242,7 +257,7 @@ const CreateUpdateProductModal = ({
                   {imagePreview && (
                     <div className="mt-2 relative w-40 h-40 border rounded overflow-hidden">
                       <img
-                        src={imagePreview}
+                        src={`${imagePreview}?t=${Date.now()}`}
                         alt="Product preview"
                         className="w-full h-full object-cover"
                       />

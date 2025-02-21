@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/modal";
+import { Modal, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Button } from "@heroui/button";
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title }) => {

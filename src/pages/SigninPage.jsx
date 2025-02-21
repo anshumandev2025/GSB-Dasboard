@@ -29,11 +29,11 @@ export default function SigninPage() {
       console.log("error:", error);
     }
   };
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate("/products");
-    }
-  }, [isLoggedIn]);
+  // useEffect(() => {
+  //   if (isLoggedIn) {
+  //     navigate("/products");
+  //   }
+  // }, [isLoggedIn]);
   return (
     <div className="min-h-screen px-5 w-full flex items-center justify-center">
       <div className="max-w-md w-full space-y-8 bg-gray-800 p-8 rounded-xl shadow-lg">

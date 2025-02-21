@@ -9,6 +9,7 @@ const apiClient = axios.create({
   timeout: 10000, // Timeout for requests (optional)
   headers: {
     "Content-Type": "application/json", // Default content type
+    "Content-Type": "multipart/form-data",
   },
 });
 
@@ -47,8 +48,18 @@ apiClient.interceptors.response.use(
 // Export reusable API methods
 export const api = {
   get: (url, params) => apiClient.get(url, { params }),
-  post: (url, data) => apiClient.post(url, data),
-  put: (url, data) => apiClient.put(url, data),
+  post: (url, data, isFormData = false) =>
+    apiClient.post(
+      url,
+      data,
+      isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : {}
+    ),
+  put: (url, data, isFormData = false) =>
+    apiClient.put(
+      url,
+      data,
+      isFormData ? { headers: { "Content-Type": "multipart/form-data" } } : {}
+    ),
   patch: (url, data) => apiClient.patch(url, data),
   delete: (url) => apiClient.delete(url),
 };

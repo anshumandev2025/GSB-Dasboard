@@ -1,4 +1,10 @@
-import { Chip, Pagination, Tooltip, useDisclosure } from "@heroui/react";
+import {
+  Chip,
+  Pagination,
+  Tooltip,
+  useDisclosure,
+  usePagination,
+} from "@heroui/react";
 import {
   Table,
   TableBody,
@@ -7,42 +13,48 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
-import { baseURL } from "../../utils/urls";
 import { Pencil, Trash2 } from "lucide-react";
 import ConfirmModal from "../modals/ConfirmModal";
+import { api } from "../../utils/apiClient";
+import useToast from "../../hooks/useToast";
+import CreateUpdateProductModal from "../modals/CreateUpdateProductModal";
 
 export const columns = [
   { name: "Name", uid: "name" },
-  { name: "Category", uid: "category" },
+  // { name: "Category", uid: "category" },
   { name: "Price", uid: "price" },
   { name: "Description", uid: "description" },
   { name: "Image", uid: "image" },
   { name: "Action", uid: "action" },
 ];
 
-const ProductsTable = () => {
-  const [products, setProducts] = useState([]);
+const ProductsTable = ({
+  products,
+  setToggleFetchProducts,
+  total,
+  setPage,
+}) => {
+  const { successToast, errorToast } = useToast();
   const [currentProduct, setCurrentProduct] = useState();
   const {
     isOpen: isOpenDeleteProduct,
     onClose: onCloseDeleteProduct,
     onOpen: onOpenDeleteProduct,
   } = useDisclosure();
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const response = await axios.get(`${baseURL}/product`);
-      setProducts(response.data);
-    };
-    fetchProducts();
-  }, []);
+  const {
+    isOpen: isOpenEditProduct,
+    onClose: onCloseEditProduct,
+    onOpen: onOpenEditProduct,
+  } = useDisclosure();
 
   const deleteProduct = async () => {
     if (currentProduct) {
       try {
-        await axios.delete(`${baseURL}/product/${currentProduct._id}`);
+        await api.delete(`/product/${currentProduct._id}`);
         onCloseDeleteProduct();
+        setToggleFetchProducts((prev) => !prev);
+        successToast("Product deleted successfully");
       } catch (error) {
         console.log("error-->", error);
       }
@@ -57,7 +69,7 @@ const ProductsTable = () => {
         return (
           <img
             className="size-20 object-cover"
-            src={product.image}
+            src={`${product.image}?t=${Date.now()}`}
             alt="product"
           />
         );
@@ -74,6 +86,7 @@ const ProductsTable = () => {
               <span
                 onClick={() => {
                   setCurrentProduct(product);
+                  onOpenEditProduct();
                 }}
                 className="text-lg text-default-400 cursor-pointer active:opacity-50"
               >
@@ -99,7 +112,22 @@ const ProductsTable = () => {
   }, []);
   return (
     <div className="mt-10 space-y-10 text-black">
-      <Table aria-label="Example table with custom cells " className="h-screen">
+      <Table
+        aria-label="Example table with custom cells "
+        className="h-screen"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              initialPage={1}
+              total={total / 10 + 1}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
+      >
         <TableHeader columns={columns}>
           {(column) => (
             <TableColumn
@@ -120,14 +148,17 @@ const ProductsTable = () => {
           )}
         </TableBody>
       </Table>
-      <div className="w-full flex justify-end">
-        <Pagination isCompact showControls initialPage={1} total={10} />
-      </div>
       <ConfirmModal
         isOpen={isOpenDeleteProduct}
         onClose={onCloseDeleteProduct}
         title="Are you sure you want to delete this product"
         onConfirm={deleteProduct}
+      />
+      <CreateUpdateProductModal
+        isOpen={isOpenEditProduct}
+        onClose={onCloseEditProduct}
+        setToggleFetchProducts={setToggleFetchProducts}
+        productInfo={currentProduct}
       />
     </div>
   );
