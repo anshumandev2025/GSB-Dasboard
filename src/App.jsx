@@ -9,6 +9,7 @@ import VideoPage from "./pages/VideoPage";
 import DietPdfPage from "./pages/DietPdfPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
+import QuestionsPage from "./pages/QuestionsPage";
 const App = () => {
   const { isLoggedIn } = useAuth();
   return (
@@ -23,6 +24,7 @@ const App = () => {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/videos" element={<VideoPage />} />
           <Route path="/diet-pdf" element={<DietPdfPage />} />
+          <Route path="/questions" element={<QuestionsPage />} />
         </Route>
       </Routes>
     </div>

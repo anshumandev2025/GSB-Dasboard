@@ -9,7 +9,6 @@ const apiClient = axios.create({
   timeout: 10000, // Timeout for requests (optional)
   headers: {
     "Content-Type": "application/json", // Default content type
-    "Content-Type": "multipart/form-data",
   },
 });
 

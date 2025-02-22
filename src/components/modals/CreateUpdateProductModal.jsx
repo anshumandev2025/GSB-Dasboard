@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
-import { Select, SelectItem } from "@heroui/select";
 import { api } from "../../utils/apiClient";
 
 const CreateUpdateProductModal = ({

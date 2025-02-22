@@ -14,6 +14,7 @@ import { Input } from "@heroui/input";
 import axios from "axios";
 import { baseURL } from "../../utils/urls";
 import useToast from "../../hooks/useToast";
+import { api } from "../../utils/apiClient";
 const CreateEmployeeModal = ({
   isOpen,
   onClose,
@@ -80,7 +81,7 @@ const CreateEmployeeModal = ({
         successToast("Employee update successfully");
         setToggleFetchEmployees((prev) => !prev);
       } else {
-        await axios.post(`${baseURL}/employee`, {
+        await api.post(`/employee`, {
           employee_name: data.name,
           employee_email_address: data.email,
           employee_mobile_number: data.mobile,
