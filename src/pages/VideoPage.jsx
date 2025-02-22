@@ -1,15 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/common/Header";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import VideoTable from "../components/table/VideoTable";
 import { useDisclosure } from "@heroui/modal";
 import { Button } from "@heroui/button";
+import CreateUpdateVideoModal from "../components/modals/CreateUpdateVideoModal";
+import { api } from "../utils/apiClient";
 
 const VideoPage = () => {
   const filterOptions = ["Youtube", "Uploaded"];
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const [videos, setVideos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(10);
+  const [search, setSearch] = useState("");
+  const {
+    isOpen: isOpenAddVideo,
+    onOpen: onOpenAddVideo,
+    onClose: onCloseAddVideo,
+  } = useDisclosure();
+  const [toggleFetchVideos, setToggleFetchVideos] = useState(false);
+  useEffect(() => {
+    const fetchVideos = async () => {
+      const response = await api.get(
+        `/video?page=${page}&limit=10&search=${search}`
+      );
+      setVideos(response.data.data);
+      setTotal(response.data.total);
+    };
+    fetchVideos();
+  }, [toggleFetchVideos, search]);
   return (
     <>
       <div className="flex-1 overflow-auto relative z-10">
@@ -20,25 +40,36 @@ const VideoPage = () => {
               <Input
                 className="max-w-[300px] text-black"
                 variant="flat"
-                placeholder="Search here..."
+                placeholder="Search Video here"
                 type="text"
+                onChange={(e) => setSearch(e.target.value)}
               />
-              <Select className="w-60" placeholder="Select Filter">
+              {/* <Select className="w-60" placeholder="Select Filter">
                 {filterOptions.map((filter, index) => (
                   <SelectItem key={index}>{filter}</SelectItem>
                 ))}
-              </Select>
+              </Select> */}
             </div>
             <div className="flex flex-1 justify-end">
-              <Button onPress={onOpen} color="primary">
+              <Button onPress={onOpenAddVideo} color="primary">
                 Add Video
               </Button>
             </div>
           </div>
 
-          <VideoTable />
+          <VideoTable
+            videos={videos}
+            total={total}
+            setPage={setPage}
+            setToggleFetchVideos={setToggleFetchVideos}
+          />
         </div>
       </div>
+      <CreateUpdateVideoModal
+        isOpen={isOpenAddVideo}
+        onClose={onCloseAddVideo}
+        setToggleFetchVideos={setToggleFetchVideos}
+      />
     </>
   );
 };

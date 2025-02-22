@@ -1,4 +1,4 @@
-import { Chip, Pagination, Tooltip } from "@heroui/react";
+import { Chip, Pagination, Tooltip, useDisclosure } from "@heroui/react";
 import {
   Table,
   TableBody,
@@ -7,100 +7,71 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import React, { useCallback } from "react";
+import { CalendarCheck, Newspaper } from "lucide-react";
+import React, { useCallback, useState } from "react";
+import UsersTableModal from "../modals/UserTableModal";
 
 export const columns = [
-  { name: "Name", uid: "name" },
-  { name: "Email", uid: "email" },
-  { name: "Mobile", uid: "mobile" },
-  { name: "Goal", uid: "goal" },
-];
-export const users = [
-  {
-    id: 1,
-    name: "Tony Reichert",
-    mobile: "235235343",
-    goal: "IBS",
-    email: "tony.reichert@example.com",
-  },
-  {
-    id: 2,
-    name: "Zoey Lang",
-    mobile: "83749834",
-    goal: "depression",
-    email: "zoey.lang@example.com",
-  },
-  {
-    id: 3,
-    name: "Jane Fisher",
-    mobile: "734398473",
-    goal: "IBS",
-    email: "jane.fisher@example.com",
-  },
-  {
-    id: 4,
-    name: "William Howard",
-    mobile: "83242343",
-    goal: "IBS",
-    email: "william.howard@example.com",
-  },
-  {
-    id: 5,
-    name: "Kristen Copper",
-    mobile: "989809099",
-    goal: "IBS",
-    email: "kristen.cooper@example.com",
-  },
-
-  {
-    id: 6,
-    name: "Tony Reichert",
-    mobile: "235235343",
-    goal: "IBS",
-    email: "tony.reichert@example.com",
-  },
-  {
-    id: 7,
-    name: "Zoey Lang",
-    mobile: "83749834",
-    goal: "IBS",
-    email: "zoey.lang@example.com",
-  },
-  {
-    id: 8,
-    name: "Jane Fisher",
-    mobile: "734398473",
-    goal: "IBS",
-    email: "jane.fisher@example.com",
-  },
-  {
-    id: 9,
-    name: "William Howard",
-    mobile: "83242343",
-    goal: "IBS",
-    email: "william.howard@example.com",
-  },
-  {
-    id: 10,
-    name: "Kristen Copper",
-    mobile: "989809099",
-    goal: "IBS",
-    email: "kristen.cooper@example.com",
-  },
+  { name: "Name", uid: "user_name" },
+  { name: "Email address", uid: "user_email_address" },
+  { name: "Mobile number", uid: "user_mobile_number" },
+  { name: "Goal", uid: "user_goal" },
+  { name: "Subscribed", uid: "user_isSubscribed" },
+  { name: "Actions", uid: "action" },
 ];
 
-const UsersTable = () => {
+const UsersTable = ({ users, total, setPage }) => {
+  const [currentUser, setCurrentUser] = useState();
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [isUpdate, setIsUpdate] = useState(false);
   const renderCell = useCallback((user, columnKey) => {
     const cellValue = user[columnKey];
-
     switch (columnKey) {
-      case "name":
-        return <h1>{user.name}</h1>;
-      case "goal":
+      case "user_goal":
         return (
           <Chip className="capitalize" size="sm" variant="flat">
             {cellValue}
           </Chip>
+        );
+      case "user_isSubscribed":
+        return (
+          <Chip
+            color={cellValue == "True" ? "success" : "danger"}
+            className="capitalize"
+            size="sm"
+            variant="flat"
+          >
+            {cellValue}
+          </Chip>
+        );
+      case "action":
+        return (
+          <div className="relative flex items-center gap-2">
+            <Tooltip content="User Updates">
+              <span
+                onClick={() => {
+                  setIsUpdate(true);
+                  setCurrentUser(user);
+                  onOpen();
+                }}
+                className="text-lg text-default-400 cursor-pointer active:opacity-50"
+              >
+                <CalendarCheck color="#10B981" />
+              </span>
+            </Tooltip>
+            <Tooltip content="User story">
+              <span
+                onClick={() => {
+                  setIsUpdate(false);
+                  setCurrentUser(user);
+                  onOpen();
+                }}
+                className="text-lg text-danger cursor-pointer active:opacity-50"
+              >
+                <Newspaper color="#3B82F6" />
+              </span>
+            </Tooltip>
+          </div>
         );
       default:
         return cellValue;
@@ -108,7 +79,22 @@ const UsersTable = () => {
   }, []);
   return (
     <div className="mt-10 space-y-10 text-black">
-      <Table aria-label="Example table with custom cells">
+      <Table
+        aria-label="Example table with custom cells "
+        className="h-screen"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              initialPage={1}
+              total={parseInt(total / 10) + 1}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
+      >
         <TableHeader columns={columns}>
           {(column) => (
             <TableColumn
@@ -121,7 +107,7 @@ const UsersTable = () => {
         </TableHeader>
         <TableBody items={users}>
           {(item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item._id}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -129,9 +115,12 @@ const UsersTable = () => {
           )}
         </TableBody>
       </Table>
-      <div className="w-full flex justify-end">
-        <Pagination isCompact showControls initialPage={1} total={10} />
-      </div>
+      <UsersTableModal
+        isOpen={isOpen}
+        onClose={onClose}
+        user={currentUser}
+        update={isUpdate}
+      />
     </div>
   );
 };

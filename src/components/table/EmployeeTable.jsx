@@ -28,6 +28,7 @@ const EmployeeTable = ({ employeesData, total, setToggleFetchEmployees }) => {
   const [employeeInfo, setEmployeeInfo] = useState(null);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { successToast, errorToast } = useToast();
+
   const {
     isOpen: isOpenConfirmModal,
     onClose: onCloseConfirmModal,
@@ -120,7 +121,21 @@ const EmployeeTable = ({ employeesData, total, setToggleFetchEmployees }) => {
   }, []);
   return (
     <div className="mt-10 space-y-10 text-black">
-      <Table aria-label="Example table with custom cells">
+      <Table
+        aria-label="Example table with custom cells"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              initialPage={1}
+              total={parseInt(total / 10) + 1}
+              // onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
+      >
         <TableHeader columns={columns}>
           {(column) => (
             <TableColumn
@@ -141,9 +156,7 @@ const EmployeeTable = ({ employeesData, total, setToggleFetchEmployees }) => {
           )}
         </TableBody>
       </Table>
-      <div className="w-full flex justify-end">
-        <Pagination isCompact showControls initialPage={1} total={total} />
-      </div>
+      <div className="w-full flex justify-end"></div>
       <CreateEmployeeModal
         isOpen={isOpen}
         onClose={onClose}

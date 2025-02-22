@@ -43,11 +43,11 @@ const EmployeePage = () => {
               <Input
                 className="max-w-[300px] text-black"
                 variant="flat"
-                placeholder="Search here..."
+                placeholder="Search Employees"
                 type="text"
                 onChange={(e) => setQuery(e.target.value)}
               />
-              <Select
+              {/* <Select
                 onChange={(e) =>
                   e.target.value == "0"
                     ? setFilter("active")
@@ -59,7 +59,7 @@ const EmployeePage = () => {
                 {filterOptions.map((filter, index) => (
                   <SelectItem key={index}>{filter}</SelectItem>
                 ))}
-              </Select>
+              </Select> */}
             </div>
             <div className="flex flex-1 justify-end">
               <Button

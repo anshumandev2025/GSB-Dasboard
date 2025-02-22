@@ -1,10 +1,4 @@
-import {
-  Chip,
-  Pagination,
-  Tooltip,
-  useDisclosure,
-  usePagination,
-} from "@heroui/react";
+import { Chip, Pagination, Tooltip, useDisclosure } from "@heroui/react";
 import {
   Table,
   TableBody,
@@ -122,7 +116,7 @@ const ProductsTable = ({
               showControls
               showShadow
               initialPage={1}
-              total={total / 10 + 1}
+              total={parseInt(total / 10) + 1}
               onChange={(page) => setPage(page)}
             />
           </div>

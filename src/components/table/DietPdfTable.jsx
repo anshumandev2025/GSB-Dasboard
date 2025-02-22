@@ -1,4 +1,4 @@
-import { Chip, Pagination, Tooltip } from "@heroui/react";
+import { Chip, Pagination, Tooltip, useDisclosure } from "@heroui/react";
 import {
   Table,
   TableBody,
@@ -7,121 +7,87 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
+import { FileText, Pencil, Trash2 } from "lucide-react";
+import ConfirmModal from "../modals/ConfirmModal";
+import { api } from "../../utils/apiClient";
+import useToast from "../../hooks/useToast";
+import CreateUpdateVideoModal from "../modals/CreateUpdateVideoModal";
 
 export const columns = [
-  { name: "Name", uid: "name" },
-  { name: "Price", uid: "price" },
+  { name: "Title", uid: "title" },
   { name: "Description", uid: "description" },
-  { name: "Image", uid: "image" },
-];
-export const users = [
-  {
-    id: 1,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 2,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 3,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 4,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 5,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-
-  {
-    id: 6,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 7,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 8,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 9,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
-  {
-    id: 10,
-    name: "Tony Reichert",
-    price: "400",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti amet quia, asperiores officia consectetur blanditiis saepe praesentium atque. Ipsum, consequatur?",
-    image:
-      "https://www.patanjaliayurved.net/assets/product_images/400x400/1737527431thumbnail.webp",
-  },
+  { name: "Type", uid: "type" },
+  { name: "Category", uid: "category" },
+  { name: "Pdf", uid: "pdf_url" },
+  { name: "Action", uid: "action" },
 ];
 
-const DietPdfTable = () => {
-  const renderCell = useCallback((product, columnKey) => {
-    const cellValue = product[columnKey];
+const DietPdfTable = ({ diets, setToggleDiets, total, setPage }) => {
+  const { successToast, errorToast } = useToast();
+  const [currentDiet, setCurrentDiet] = useState();
+  const {
+    isOpen: isOpenDeleteDiet,
+    onClose: onCloseDeleteDiet,
+    onOpen: onOpenDeleteDiet,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenEditDiet,
+    onClose: onCloseEditDiet,
+    onOpen: onOpenEditDiet,
+  } = useDisclosure();
+
+  const deleteDiet = async () => {
+    if (currentDiet) {
+      try {
+        await api.delete(`/diet/${currentDiet._id}`);
+        onCloseDeleteDiet();
+        setToggleDiets((prev) => !prev);
+        successToast("Diet pdf deleted successfully");
+      } catch (error) {
+        console.log("error-->", error);
+      }
+    }
+  };
+  const renderCell = useCallback((diet, columnKey) => {
+    const cellValue = diet[columnKey];
     switch (columnKey) {
       case "description":
-        return <p className="text-wrap">{product.description}</p>;
-      case "image":
-        return <img src={product.image} alt="product" />;
-      case "goal":
+        return <p className="text-wrap">{diet.description}</p>;
+      case "pdf_url":
         return (
-          <Chip className="capitalize" size="sm" variant="flat">
-            {cellValue}
-          </Chip>
+          <div>
+            <a href={diet.pdf_url} target="__blank">
+              <FileText />
+            </a>
+          </div>
+        );
+      case "action":
+        return (
+          <div className="relative flex items-center gap-2">
+            <Tooltip content="Edit user">
+              <span
+                onClick={() => {
+                  setCurrentDiet(diet);
+                  onOpenEditDiet();
+                }}
+                className="text-lg text-default-400 cursor-pointer active:opacity-50"
+              >
+                <Pencil />
+              </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete user">
+              <span
+                onClick={() => {
+                  onOpenDeleteDiet();
+                  setCurrentDiet(diet);
+                }}
+                className="text-lg text-danger cursor-pointer active:opacity-50"
+              >
+                <Trash2 />
+              </span>
+            </Tooltip>
+          </div>
         );
       default:
         return cellValue;
@@ -129,7 +95,22 @@ const DietPdfTable = () => {
   }, []);
   return (
     <div className="mt-10 space-y-10 text-black">
-      <Table aria-label="Example table with custom cells " className="h-screen">
+      <Table
+        aria-label="Example table with custom cells "
+        className="h-screen"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              initialPage={1}
+              total={parseInt(total / 10) + 1}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        }
+      >
         <TableHeader columns={columns}>
           {(column) => (
             <TableColumn
@@ -140,9 +121,9 @@ const DietPdfTable = () => {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody items={users}>
+        <TableBody items={diets}>
           {(item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item._id}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -150,9 +131,18 @@ const DietPdfTable = () => {
           )}
         </TableBody>
       </Table>
-      <div className="w-full flex justify-end">
-        <Pagination isCompact showControls initialPage={1} total={10} />
-      </div>
+      <ConfirmModal
+        isOpen={isOpenDeleteDiet}
+        onClose={onCloseDeleteDiet}
+        title="Are you sure you want to delete this Diet pdf"
+        onConfirm={deleteDiet}
+      />
+      <CreateUpdateVideoModal
+        isOpen={isOpenEditDiet}
+        onClose={onCloseEditDiet}
+        setToggleDiets={setToggleDiets}
+        videoInfo={currentDiet}
+      />
     </div>
   );
 };
