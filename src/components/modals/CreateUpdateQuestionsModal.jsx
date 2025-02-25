@@ -123,7 +123,12 @@ const CreateUpdateQuestionModal = ({
       };
 
       console.log("payload-->", payload);
-      const response = await api.post("/question", payload);
+      if (questionInfo) {
+        payload.id = questionInfo._id;
+        await api.put("/question", payload);
+      } else {
+        await api.post("/question", payload);
+      }
       setToggleFetchQuestions((prev) => !prev);
       onClose();
       reset();

@@ -116,10 +116,18 @@ const CreateUpdateVideoModal = ({
       console.log("Form Data:", Object.fromEntries(formData));
 
       // Perform API request (replace with actual API call)
-      const response = await api.post("/video", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("response123-->", response);
+      if (videoInfo) {
+        formData.append("id", videoInfo._id);
+        const response = await api.put("/video", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log("response123-->", response);
+      } else {
+        const response = await api.post("/video", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        console.log("response123333-->", response);
+      }
       setToggleFetchVideos((prev) => !prev);
       onClose();
       reset();

@@ -15,9 +15,9 @@ const ViewMediaModal = ({ isOpen, onClose, url, type }) => {
             ) : (
               <>
                 <video
-                  src={video.video_url}
+                  src={url}
                   controls
-                  className="w-full h-full object-cover"
+                  className="w-[50vw] h-[50vh] object-cover"
                 ></video>
               </>
             )}

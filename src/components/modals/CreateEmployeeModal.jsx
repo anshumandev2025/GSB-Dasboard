@@ -11,8 +11,6 @@ import {
   ModalHeader,
 } from "@heroui/modal";
 import { Input } from "@heroui/input";
-import axios from "axios";
-import { baseURL } from "../../utils/urls";
 import useToast from "../../hooks/useToast";
 import { api } from "../../utils/apiClient";
 const CreateEmployeeModal = ({
@@ -72,7 +70,7 @@ const CreateEmployeeModal = ({
   const submitForm = async (data) => {
     try {
       if (employeeInfo) {
-        await axios.put(`${baseURL}/employee`, {
+        await api.put(`/employee`, {
           employee_id: employeeInfo._id,
           employee_name: data.name,
           employee_email_address: data.email,
